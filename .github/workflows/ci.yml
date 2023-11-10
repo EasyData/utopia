@@ -18,7 +18,7 @@ jobs:
           run: |
             cd /work
             pip install -r requirements.txt
-            for city in beijing shanghai; do
+            for city in beijing shanghai shenzhen; do
               mkdir -p archives/$city
               output="archives/$city/$(date +%F).jsonl"
               scrapy runspider spiders/$city.py -o $output:jsonlines

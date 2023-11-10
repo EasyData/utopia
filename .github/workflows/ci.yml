@@ -8,23 +8,28 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: easypi/scrapyd
     steps:
       - uses: actions/checkout@v4
-      - shell: bash
-        run: |
-          for city in beijing shanghai shenzhen; do
-            mkdir -p archives/$city
-            output="archives/$city/$(date +%F).jsonl"
-            scrapy runspider spiders/$city.py -o $output:jsonlines
-            if [[ -s $output ]]; then
-              gzip -f $output
-              echo "OK: $city"
-            else
-              rm -f $output
-              echo "ERROR: $city"
-            fi
-          done
+      - uses: addnab/docker-run-action@v3
+        with:
+          image: easypi/scrapyd
+          options: -v ${{ github.workspace }}:/work
+          shell: bash
+          run: |
+            cd /work
+            pip install -r requirements.txt
+            for city in beijing shanghai shenzhen; do
+              mkdir -p archives/$city
+              output="archives/$city/$(date +%F).jsonl"
+              scrapy runspider spiders/$city.py -o $output:jsonlines
+              if [[ -s $output ]]; then
+                gzip -f $output
+                echo "OK: $city"
+              else
+                rm -f $output
+                echo "ERROR: $city"
+              fi
+            done
       - shell: bash
         run: |
           git config user.name github-actions

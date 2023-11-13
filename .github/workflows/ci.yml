@@ -13,22 +13,8 @@ jobs:
       - uses: addnab/docker-run-action@v3
         with:
           image: easypi/scrapyd
-          options: -v ${{ github.workspace }}:/work
-          shell: bash
-          run: |
-            cd /work
-            for city in beijing shanghai shenzhen; do
-              mkdir -p archives/$city
-              output="archives/$city/$(date +%F).jsonl"
-              scrapy runspider spiders/$city.py -o $output:jsonlines
-              if [[ -s $output ]]; then
-                gzip -f $output
-                echo "OK: $city"
-              else
-                rm -f $output
-                echo "ERROR: $city"
-              fi
-            done
+          options: -v ${{ github.workspace }}:/work -w /work
+          run: ./run.sh
       - shell: bash
         run: |
           git config user.name github-actions
